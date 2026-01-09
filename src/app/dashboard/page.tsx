@@ -4,46 +4,52 @@ import { useEffect, useState } from "react";
 import { UserSync } from "@/components/dashboard/UserSync";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { FileText, Users, ArrowRight, Plus, DollarSign, TrendingUp } from "lucide-react";
+import { FileText, Users, ArrowRight, Plus, DollarSign, TrendingUp, Home, Receipt } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const quickActions = [
   {
-    title: "Create Invoice",
-    description: "Generate a new invoice",
-    href: "/dashboard/invoices/new",
+    title: "New Agreement",
+    description: "Create a new rent agreement",
+    href: "/dashboard/agreements/new",
     icon: Plus,
   },
   {
-    title: "View Invoices",
-    description: "See all your invoices",
-    href: "/dashboard/invoices",
+    title: "View Agreements",
+    description: "See all rent agreements",
+    href: "/dashboard/agreements",
     icon: FileText,
   },
   {
-    title: "Manage Clients",
-    description: "Add or edit clients",
-    href: "/dashboard/clients",
+    title: "Manage Tenants",
+    description: "Add or edit tenants",
+    href: "/dashboard/tenants",
     icon: Users,
+  },
+  {
+    title: "Manage Landlords",
+    description: "Add or edit landlords",
+    href: "/dashboard/landlords",
+    icon: Home,
   },
 ];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
-    totalInvoices: 0,
-    totalRevenue: 0,
-    paidInvoices: 0,
-    pendingAmount: 0,
+    totalAgreements: 0,
+    activeAgreements: 0,
+    totalMonthlyRent: 0,
+    totalDeposit: 0,
   });
-  interface RecentInvoice {
+  interface RecentAgreement {
     id: string;
-    invoice_number: string;
-    total: number;
+    agreement_number: string;
+    monthly_rent: number;
     status: string;
-    client: { name: string } | null;
+    tenant: { name: string } | null;
   }
 
-  const [recentInvoices, setRecentInvoices] = useState<RecentInvoice[]>([]);
+  const [recentAgreements, setRecentAgreements] = useState<RecentAgreement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,45 +60,45 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       const supabase = createSupabaseBrowserClient();
-      const { data: invoices, error } = await supabase
-        .from("invoices")
-        .select("id, invoice_number, status, total, paid_amount, issue_date, clients:client_id(name)")
+      const { data: agreements, error } = await supabase
+        .from("rent_agreements")
+        .select("id, agreement_number, status, monthly_rent, deposit_amount, start_date, tenants:tenant_id(name)")
         .order("created_at", { ascending: false })
         .limit(5);
 
       if (error) throw error;
 
-      const totalInvoices = invoices?.length || 0;
-      const totalRevenue = invoices?.reduce((sum, inv) => sum + (inv.paid_amount || 0), 0) || 0;
-      const paidInvoices = invoices?.filter((inv) => inv.status === "paid").length || 0;
-      const pendingAmount = invoices?.reduce((sum, inv) => sum + (inv.total - (inv.paid_amount || 0)), 0) || 0;
+      const totalAgreements = agreements?.length || 0;
+      const activeAgreements = agreements?.filter((agr) => agr.status === "active").length || 0;
+      const totalMonthlyRent = agreements?.reduce((sum, agr) => sum + (agr.monthly_rent || 0), 0) || 0;
+      const totalDeposit = agreements?.reduce((sum, agr) => sum + (agr.deposit_amount || 0), 0) || 0;
 
       setStats({
-        totalInvoices,
-        totalRevenue,
-        paidInvoices,
-        pendingAmount,
+        totalAgreements,
+        activeAgreements,
+        totalMonthlyRent,
+        totalDeposit,
       });
 
-      // Transform invoices to match RecentInvoice interface
-      const formattedInvoices: RecentInvoice[] = (invoices || []).map((inv: {
+      // Transform agreements to match RecentAgreement interface
+      const formattedAgreements: RecentAgreement[] = (agreements || []).map((agr: {
         id: string;
-        invoice_number: string;
+        agreement_number: string;
         status: string;
-        total: number;
-        issue_date: string;
-        clients?: { name: string }[] | { name: string } | null;
+        monthly_rent: number;
+        start_date: string;
+        tenants?: { name: string }[] | { name: string } | null;
       }) => ({
-        id: inv.id,
-        invoice_number: inv.invoice_number,
-        total: inv.total,
-        status: inv.status,
-        client: Array.isArray(inv.clients) 
-          ? (inv.clients[0] || null)
-          : (inv.clients || null),
+        id: agr.id,
+        agreement_number: agr.agreement_number,
+        monthly_rent: agr.monthly_rent,
+        status: agr.status,
+        tenant: Array.isArray(agr.tenants) 
+          ? (agr.tenants[0] || null)
+          : (agr.tenants || null),
       }));
 
-      setRecentInvoices(formattedInvoices);
+      setRecentAgreements(formattedAgreements);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -107,52 +113,52 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">Dashboard Overview</h1>
           <p className="text-muted-foreground mt-2">
-            Welcome back! Here&apos;s your invoice summary
+            Welcome back! Here&apos;s your rent agreement summary
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Agreements</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalInvoices}</div>
+              <div className="text-2xl font-bold">{stats.totalAgreements}</div>
               <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">Paid invoices</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Paid Invoices</CardTitle>
+              <CardTitle className="text-sm font-medium">Active Agreements</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.paidInvoices}</div>
-              <p className="text-xs text-muted-foreground">Completed</p>
+              <div className="text-2xl font-bold">{stats.activeAgreements}</div>
+              <p className="text-xs text-muted-foreground">Currently active</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Monthly Rent</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.pendingAmount.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">Outstanding</p>
+              <div className="text-2xl font-bold">₹{stats.totalMonthlyRent.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Per month</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Deposits</CardTitle>
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">₹{stats.totalDeposit.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Security deposits</p>
             </CardContent>
           </Card>
         </div>
@@ -162,7 +168,7 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>
-                Get started with invoicing
+                Get started with rent agreements
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -194,9 +200,9 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Invoices</CardTitle>
+              <CardTitle>Recent Agreements</CardTitle>
               <CardDescription>
-                Your latest invoices
+                Your latest rent agreements
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -204,31 +210,31 @@ export default function DashboardPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   Loading...
                 </div>
-              ) : recentInvoices.length === 0 ? (
+              ) : recentAgreements.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No invoices yet</p>
+                  <p>No agreements yet</p>
                   <p className="text-sm mt-2">
-                    Create your first invoice to get started
+                    Create your first rent agreement to get started
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recentInvoices.map((invoice) => (
+                  {recentAgreements.map((agreement) => (
                     <Link
-                      key={invoice.id}
-                      href={`/dashboard/invoices/${invoice.id}`}
+                      key={agreement.id}
+                      href={`/dashboard/agreements/${agreement.id}`}
                       className="flex items-center justify-between rounded-lg border p-3 transition hover:bg-slate-50"
                     >
                       <div>
-                        <p className="font-medium">{invoice.invoice_number}</p>
+                        <p className="font-medium">{agreement.agreement_number}</p>
                         <p className="text-sm text-muted-foreground">
-                          {invoice.client?.name || "No client"}
+                          {agreement.tenant?.name || "No tenant"}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${invoice.total.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{invoice.status}</p>
+                        <p className="font-medium">₹{agreement.monthly_rent.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{agreement.status}</p>
                       </div>
                     </Link>
                   ))}

@@ -5,8 +5,8 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 
 export const metadata: Metadata = {
-  title: "InvoWise",
-  description: "Create Professional, Invoices Instantly",
+  title: "LeaseFlow",
+  description: "Manage Rent Agreements, Payments, and Maintenance",
 };
 
 export default async function DashboardLayout({

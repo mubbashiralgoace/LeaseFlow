@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "InvoWise",
-  description: "Create Professional, Invoices Instantly",
+  title: "LeaseFlow",
+  description: "Create Professional, Rent Agreements",
 };
 
 export default function AuthLayout({
@@ -21,7 +21,7 @@ export default function AuthLayout({
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <h1 className="mt-3 text-3xl font-semibold text-white">
-            InvoWise
+            LeaseFlow
             </h1>
             <p className="mt-2 text-sm text-slate-400">
               Sign in, create an account, or recover access.

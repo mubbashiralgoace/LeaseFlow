@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "InvoWise | Create Professional Invoices Instantly",
-    template: "%s | InvoWise",
+    default: "LeaseFlow | Create Professional Rent Agreements",
+    template: "%s | Rent Agreement Manager",
   },
   description: "InvoWise is a free, fast invoice generator for freelancers and businesses. Create invoices, track payments, and export PDFs in minutes.",
   metadataBase: new URL("https://invowise-invoice.vercel.app"),

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Plus, LogOut, User } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Plus, LogOut, User, Home, Wrench, Receipt, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,19 +19,39 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
-    href: "/dashboard/invoices",
-    label: "Invoices",
+    href: "/dashboard/agreements",
+    label: "Rent Agreements",
     icon: FileText,
   },
   {
-    href: "/dashboard/invoices/new",
-    label: "Create Invoice",
+    href: "/dashboard/agreements/new",
+    label: "New Agreement",
     icon: Plus,
   },
   {
-    href: "/dashboard/clients",
-    label: "Clients",
+    href: "/dashboard/tenants",
+    label: "Tenants",
     icon: Users,
+  },
+  {
+    href: "/dashboard/landlords",
+    label: "Landlords",
+    icon: Home,
+  },
+  {
+    href: "/dashboard/payments",
+    label: "Rent Payments",
+    icon: Receipt,
+  },
+  {
+    href: "/dashboard/maintenance",
+    label: "Maintenance",
+    icon: Wrench,
+  },
+  {
+    href: "/dashboard/utilities",
+    label: "Utility Bills",
+    icon: Calculator,
   },
 ];
 
@@ -64,7 +84,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 flex-col border-r bg-background md:flex">
       <div className="flex h-16 items-center px-6">
-      <h1 className="mt-3 text-3xl font-semibold text-black">InvoWise</h1>
+      <h1 className="mt-3 text-3xl font-semibold text-black">LeaseFlow</h1>
       </div>
 
       <ScrollArea className="flex-1">
